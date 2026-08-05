@@ -1,0 +1,8 @@
+.terraform/
+*.tfstate
+*.tfstate.backup
+*.tfvars
+.env
+.DS_Store
+.idea/
+.vscode/
