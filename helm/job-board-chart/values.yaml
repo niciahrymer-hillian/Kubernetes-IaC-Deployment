@@ -1,0 +1,29 @@
+# Overridden per environment with `helm upgrade --set image.tag=<sha>` —
+# the CI/CD pipeline never edits this file, it passes the value at deploy
+# time so this chart stays identical across every environment.
+replicaCount: 3
+
+image:
+  repository: ghcr.io/niciahrymer-hillian/dockerized-microservices-api
+  tag: latest
+  pullPolicy: IfNotPresent
+
+service:
+  port: 80
+  targetPort: 8000
+
+ingress:
+  enabled: true
+  host: job-board.example.com
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 128Mi
+  limits:
+    cpu: 500m
+    memory: 256Mi
+
+rollingUpdate:
+  maxSurge: 1
+  maxUnavailable: 0

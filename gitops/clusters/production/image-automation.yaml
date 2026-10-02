@@ -1,0 +1,24 @@
+# Image automation: the piece past "the cluster pulls its config from git" —
+# this closes the OTHER direction, where a newly-pushed image tag gets
+# written BACK into git automatically, so even image.tag stays
+# declared-in-git rather than pushed by a CI job's `helm upgrade --set`.
+apiVersion: image.toolkit.fluxcd.io/v1
+kind: ImageRepository
+metadata:
+  name: job-board-api
+  namespace: flux-system
+spec:
+  image: ghcr.io/niciahrymer-hillian/dockerized-microservices-api
+  interval: 5m
+---
+apiVersion: image.toolkit.fluxcd.io/v1
+kind: ImagePolicy
+metadata:
+  name: job-board-api
+  namespace: flux-system
+spec:
+  imageRepositoryRef:
+    name: job-board-api
+  policy:
+    alphabetical:
+      order: asc

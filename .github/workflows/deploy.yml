@@ -1,0 +1,47 @@
+name: Deploy
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    outputs:
+      image_tag: ${{ steps.vars.outputs.sha_short }}
+    steps:
+      - uses: actions/checkout@v4
+      - id: vars
+        run: echo "sha_short=$(git rev-parse --short HEAD)" >> "$GITHUB_OUTPUT"
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - uses: docker/build-push-action@v6
+        with:
+          context: ../Dockerized-Microservices/api
+          push: true
+          tags: ghcr.io/${{ github.repository_owner }}/dockerized-microservices-api:${{ steps.vars.outputs.sha_short }}
+
+  # This job is the Actions-pipeline half of deployment — Lesson 4 in the
+  # tour contrasts it with the Flux (GitOps) half below. Both reach the same
+  # end state; they differ in WHO initiates the change.
+  helm-upgrade:
+    needs: build-and-push
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - uses: actions/checkout@v4
+      - name: Configure kubectl
+        run: aws eks update-kubeconfig --region us-east-1 --name job-board-cluster
+      - name: Deploy
+        run: |
+          helm upgrade --install job-board ./helm/job-board-chart \
+            --set image.tag=${{ needs.build-and-push.outputs.image_tag }} \
+            --namespace job-board --create-namespace
+      - name: Verify rollout
+        run: kubectl rollout status deployment/job-board-job-board -n job-board --timeout=120s

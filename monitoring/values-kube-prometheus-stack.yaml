@@ -1,0 +1,27 @@
+# Values OVERRIDE for the community chart — not a chart this project
+# authors itself. `prometheus-community/kube-prometheus-stack` is ~40k
+# lines of CRDs/RBAC/dashboards; the lesson here is knowing what to
+# override, not re-deriving Prometheus from scratch.
+#
+# Install with:
+#   helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
+#   helm install monitoring prometheus-community/kube-prometheus-stack \
+#     -n monitoring --create-namespace -f monitoring/values-kube-prometheus-stack.yaml
+#
+# Pin a chart version (--version X.Y.Z) and check that version's own
+# values.yaml before relying on any key here — this chart has, in the past,
+# temporarily renamed/removed values like serviceMonitorSelectorNilUsesHelmValues
+# across major versions and then reverted it. Advice for one version doesn't
+# reliably carry to another.
+
+prometheus:
+  prometheusSpec:
+    # Default retention is long enough to blow a small dev cluster's disk;
+    # this is the one value every from-scratch install actually needs to
+    # look at before the PVC fills up.
+    retention: 7d
+    serviceMonitorSelectorNilUsesHelmValues: false
+
+grafana:
+  adminPassword: "REPLACE-ME-use-a-real-secret-not-this-file"
+  defaultDashboardsEnabled: true

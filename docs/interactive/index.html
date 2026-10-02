@@ -1,9 +1,407 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1"><title>Kubernetes-IaC-Deployment &mdash; Tour</title>
-<style>body{margin:0;font-family:-apple-system,sans-serif;background:#06101a;color:#e6e6e6}
-header{padding:18px 24px;border-bottom:1px solid #ffffff14}main{display:grid;grid-template-columns:1fr 1fr;min-height:60vh}
-.lesson,.practice{padding:24px}.lesson{border-right:1px solid #ffffff14}h1,h2{color:#378ADD}
-textarea{width:100%;min-height:240px;background:#0000005c;color:#e6e6e6;border:1px solid #ffffff1a;border-radius:8px;padding:12px;font-family:ui-monospace,monospace}</style></head>
-<body><header><h1>Kubernetes-IaC-Deployment &mdash; Interactive Tour (TODO)</h1><p>4-lesson split-panel tour scaffold. See docs/LESSON_PLAN.md.</p></header>
-<main><section class="lesson"><h2>Lesson 1 &mdash; TODO</h2><p>Concept + diagram on the left.</p></section>
-<section class="practice"><h3>Practice (TODO)</h3><textarea>// TODO starter code</textarea></section></main></body></html>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Kubernetes-IaC-Deployment — Interactive Tour</title>
+<style>
+  :root{--bg:#0a0f1e;--accent:#326CE5;--text:#e6ecfb;--muted:#8a94b8;--panel:#ffffff0a;--ok:#2EA56B;--bad:#C2453E;}
+  *{box-sizing:border-box}
+  body{margin:0;font-family:-apple-system,Segoe UI,Roboto,sans-serif;background:var(--bg);color:var(--text)}
+  header{padding:18px 24px;border-bottom:1px solid #ffffff1a}
+  header h1{margin:0;font-size:18px}
+  header p{margin:4px 0 0;color:var(--muted);font-size:13px}
+  .pills{display:flex;gap:8px;padding:12px 24px;flex-wrap:wrap}
+  .pill{padding:6px 12px;border-radius:999px;font-size:12px;cursor:pointer;background:var(--panel);border:1px solid #ffffff1a;color:var(--muted)}
+  .pill.active{background:var(--accent);color:#fff;font-weight:700;border-color:var(--accent)}
+  main{display:grid;grid-template-columns:1fr 1fr;min-height:62vh}
+  .lesson,.practice{padding:24px;overflow:auto}
+  .lesson{border-right:1px solid #ffffff1a}
+  .lesson h2{color:#93b4ff;margin-top:0}
+  .lesson code,.lesson pre{background:#00000055;border-radius:6px}
+  .lesson pre{padding:12px;overflow:auto;font-size:13px}
+  .lesson code{padding:1px 5px;font-size:13px}
+  .practice h3{margin-top:0;color:var(--muted);text-transform:uppercase;font-size:12px;letter-spacing:1px}
+  .practice pre{background:#00000055;border-radius:8px;padding:12px;overflow:auto;font-size:13px;font-family:ui-monospace,monospace}
+  nav{display:flex;justify-content:space-between;align-items:center;padding:16px 24px;border-top:1px solid #ffffff1a}
+  button{background:var(--accent);color:#fff;border:0;border-radius:8px;padding:10px 16px;font-weight:700;cursor:pointer;margin:0 8px 0 0}
+  button.ghost{background:transparent;color:var(--accent);border:1px solid var(--accent)}
+  button:disabled{opacity:.4;cursor:default}
+  .note{font-size:12px;color:var(--muted);margin-top:8px}
+  .diagram-card{background:#fff;border-radius:10px;padding:16px;margin-bottom:14px}
+  .diagram-card svg{width:100%;height:auto;display:block}
+  .diagram-card figcaption{font-family:sans-serif;font-size:11px;color:#666;margin-bottom:6px}
+  .quiz-panel{padding:24px;max-width:760px;margin:0 auto}
+  .quiz-panel h2{color:#93b4ff;margin-top:0}
+  .qtext{font-size:16px;font-weight:600;margin:6px 0 14px}
+  .qopt{display:block;width:100%;text-align:left;background:var(--panel);color:var(--text);border:1px solid #ffffff1f;border-radius:8px;padding:12px 14px;margin:8px 0;cursor:pointer;font-size:14px;font-family:inherit}
+  .qopt:hover:not(:disabled){border-color:var(--accent)}
+  .qopt.ok{border-color:var(--ok);background:#2ea56b22}
+  .qopt.bad{border-color:var(--bad);background:#c2453e22}
+  .qexplain{display:none;margin-top:12px;padding:12px;border-left:3px solid var(--accent);background:#ffffff0d;border-radius:4px;font-size:13px}
+  .qfoot{display:flex;justify-content:space-between;align-items:center;margin-top:18px}
+  .qfoot .sc{color:var(--muted);font-size:13px}
+  .cl{border:1px solid #ffffff1f;border-radius:10px;padding:14px 16px;margin-top:18px;background:var(--panel)}
+  .cl .cap{font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-weight:700;margin-bottom:8px}
+  .cl a{display:block;color:var(--text);text-decoration:none;padding:5px 0;font-size:13px}
+  .cl a:hover{color:#93b4ff}
+  .cl .tag{font-size:10px;font-weight:700;text-transform:uppercase;color:#93b4ff;margin-right:6px}
+  .qc{border:1px solid #ffffff1f;border-radius:10px;padding:14px 16px;margin-top:12px}
+  .qc .cap{font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-weight:700;margin-bottom:8px}
+  .qc .qt{font-size:14px;font-weight:600;margin-bottom:10px}
+  .qc .qcopt{display:block;width:100%;text-align:left;background:var(--panel);color:var(--text);border:1px solid #ffffff1f;border-radius:8px;padding:9px 12px;margin:6px 0;cursor:pointer;font-size:13px;font-family:inherit}
+  .qc .qcopt:hover:not(:disabled){border-color:var(--accent)}
+  .qc .qcopt.ok{border-color:var(--ok);background:#2ea56b22}
+  .qc .qcopt.bad{border-color:var(--bad);background:#c2453e22}
+  .qc .qcexplain{display:none;margin-top:10px;padding:10px;border-left:3px solid var(--accent);background:#ffffff0d;border-radius:4px;font-size:12px}
+  .report-card{padding:24px;max-width:580px;margin:0 auto}
+  .report-card h4{margin:16px 0 6px;font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted)}
+  .report-row{display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid #ffffff14;font-size:14px}
+  .report-row .grade{font-weight:700}
+  .grade-A{color:#2EA56B}.grade-B{color:#9ad24a}.grade-C{color:#e0b63c}.grade-D,.grade-F{color:#C2453E}.grade-dash{color:var(--muted)}
+  .report-overall{display:flex;align-items:baseline;gap:10px;margin:14px 0}
+  .report-overall .big{font-size:38px;font-weight:800;color:#93b4ff}
+  @media print{
+    header,.pills,nav,.report-card button{display:none!important}
+    body{background:#fff;color:#111}
+    .report-row{border-bottom-color:#ddd}
+  }
+</style>
+</head>
+<body>
+<header>
+  <h1>☸️ Kubernetes-IaC-Deployment &mdash; Interactive Tour <span style="color:var(--muted);font-weight:400;font-size:12px">· Chain C · concept tour</span></h1>
+  <p>Left: the concept. Right: the real Terraform/K8s/Helm/Flux config from this repo &mdash; concept-only, no live execution engine.</p>
+  <p style="font-size:11px;color:var(--muted);margin-top:4px">Progress (quick checks, quiz score) saves in this browser only &mdash; localStorage, not an account. This project was verified statically only (no live cluster/cloud account) &mdash; see Lesson 1.</p>
+</header>
+<div class="pills" id="pills"></div>
+<main>
+  <section class="lesson" id="lesson"></section>
+  <section class="practice" id="practice"></section>
+</main>
+<section class="quiz-panel" id="quizPanel" style="display:none"></section>
+<section class="report-card" id="toolPanel" style="display:none"></section>
+<nav>
+  <button class="ghost" onclick="go(-1)">← Previous</button>
+  <span id="counter"></span>
+  <button class="ghost" id="nextBtn" onclick="go(1)">Next →</button>
+</nav>
+
+<script>
+function terraformSplitSVG(){
+  return `<div class="diagram-card"><figcaption>Terraform's job stops at the CLUSTER; kubectl/helm own everything running on top of it</figcaption>
+  <svg viewBox="0 0 640 150" xmlns="http://www.w3.org/2000/svg">
+    <rect x="30" y="50" width="180" height="50" rx="8" fill="#326CE5"/>
+    <text x="120" y="80" text-anchor="middle" font-size="11" font-weight="700" fill="#fff">Terraform</text>
+    <rect x="260" y="50" width="150" height="50" rx="8" fill="#f3f4f6" stroke="#9ca3af"/>
+    <text x="335" y="72" text-anchor="middle" font-size="10" font-weight="700" fill="#374151">EKS cluster</text>
+    <text x="335" y="88" text-anchor="middle" font-size="8" fill="#6b7280">+ VPC + node group</text>
+    <rect x="460" y="50" width="150" height="50" rx="8" fill="#93b4ff"/>
+    <text x="535" y="72" text-anchor="middle" font-size="10" font-weight="700" fill="#0a0f1e">Deployment/Service</text>
+    <text x="535" y="88" text-anchor="middle" font-size="8" fill="#0a0f1e">kubectl / helm</text>
+    <line x1="210" y1="75" x2="260" y2="75" stroke="#326CE5" stroke-width="2.5" stroke-dasharray="6,6"><animate attributeName="stroke-dashoffset" from="24" to="0" dur="1s" repeatCount="indefinite"/></line>
+    <text x="235" y="65" text-anchor="middle" font-size="8" fill="#326CE5" font-weight="700">creates</text>
+    <text x="410" y="40" text-anchor="middle" font-size="8" fill="#6b7280">separate layer &mdash;</text>
+    <text x="410" y="118" text-anchor="middle" font-size="8" fill="#6b7280">NOT managed by Terraform here</text>
+  </svg></div>`;
+}
+function probesSVG(){
+  return `<div class="diagram-card"><figcaption>same failure, two different Kubernetes reactions depending on WHICH probe failed</figcaption>
+  <svg viewBox="0 0 640 150" xmlns="http://www.w3.org/2000/svg">
+    <rect x="30" y="55" width="140" height="44" rx="8" fill="#f3f4f6" stroke="#9ca3af"/>
+    <text x="100" y="82" text-anchor="middle" font-size="10" font-weight="700" fill="#374151">pod (unhealthy)</text>
+    <rect x="260" y="20" width="150" height="40" rx="8" fill="#e0b63c"/>
+    <text x="335" y="44" text-anchor="middle" font-size="9.5" font-weight="700" fill="#06180f">readinessProbe fails</text>
+    <rect x="260" y="90" width="150" height="40" rx="8" fill="#C2453E"/>
+    <text x="335" y="114" text-anchor="middle" font-size="9.5" font-weight="700" fill="#fff">livenessProbe fails</text>
+    <rect x="480" y="20" width="140" height="40" rx="8" fill="#f3f4f6" stroke="#9ca3af"/>
+    <text x="550" y="44" text-anchor="middle" font-size="9" fill="#374151">removed from Service</text>
+    <rect x="480" y="90" width="140" height="40" rx="8" fill="#f3f4f6" stroke="#9ca3af"/>
+    <text x="550" y="114" text-anchor="middle" font-size="9" fill="#374151">container KILLED + restarted</text>
+    <line x1="170" y1="70" x2="260" y2="40" stroke="#e0b63c" stroke-width="2"/>
+    <line x1="170" y1="85" x2="260" y2="110" stroke="#C2453E" stroke-width="2"/>
+    <line x1="410" y1="40" x2="480" y2="40" stroke="#e0b63c" stroke-width="2" stroke-dasharray="5,5"/>
+    <line x1="410" y1="110" x2="480" y2="110" stroke="#C2453E" stroke-width="2" stroke-dasharray="5,5"/>
+  </svg></div>`;
+}
+function helmRenderSVG(){
+  return `<div class="diagram-card"><figcaption>helm lint checks the CHART; only rendering + re-validating the OUTPUT catches a templating bug</figcaption>
+  <svg viewBox="0 0 640 140" xmlns="http://www.w3.org/2000/svg">
+    <rect x="20" y="50" width="140" height="40" rx="8" fill="#326CE5"/>
+    <text x="90" y="74" text-anchor="middle" font-size="10" font-weight="700" fill="#fff">values.yaml</text>
+    <rect x="250" y="50" width="140" height="40" rx="8" fill="#93b4ff"/>
+    <text x="320" y="74" text-anchor="middle" font-size="9.5" font-weight="700" fill="#0a0f1e">helm template</text>
+    <rect x="480" y="20" width="140" height="40" rx="8" fill="#f3f4f6" stroke="#9ca3af"/>
+    <text x="550" y="44" text-anchor="middle" font-size="9" fill="#374151">rendered YAML</text>
+    <rect x="480" y="90" width="140" height="40" rx="8" fill="#2EA56B"/>
+    <text x="550" y="114" text-anchor="middle" font-size="9" font-weight="700" fill="#fff">kubeconform -strict</text>
+    <line x1="160" y1="70" x2="250" y2="70" stroke="#326CE5" stroke-width="2" stroke-dasharray="6,6"><animate attributeName="stroke-dashoffset" from="24" to="0" dur="1s" repeatCount="indefinite"/></line>
+    <line x1="390" y1="60" x2="480" y2="40" stroke="#9ca3af" stroke-width="1.5"/>
+    <line x1="550" y1="60" x2="550" y2="90" stroke="#2EA56B" stroke-width="2"/>
+  </svg></div>`;
+}
+function gitopsSVG(){
+  return `<div class="diagram-card"><figcaption>CI PUSHES a change; Flux PULLS on its own interval &mdash; both reach the same end state, differently</figcaption>
+  <svg viewBox="0 0 640 150" xmlns="http://www.w3.org/2000/svg">
+    <text x="20" y="20" font-size="10" font-weight="700" fill="#374151">CI-driven (push)</text>
+    <rect x="30" y="30" width="110" height="36" rx="7" fill="#9ca3af"/><text x="85" y="52" text-anchor="middle" font-size="9" font-weight="700" fill="#1f2937">CI job</text>
+    <rect x="220" y="30" width="110" height="36" rx="7" fill="#326CE5"/><text x="275" y="52" text-anchor="middle" font-size="9" font-weight="700" fill="#fff">cluster</text>
+    <line x1="140" y1="48" x2="220" y2="48" stroke="#9ca3af" stroke-width="2.5"><animate attributeName="stroke-dashoffset" from="20" to="0" dur="1s" repeatCount="indefinite"/></line>
+    <text x="180" y="40" text-anchor="middle" font-size="8" fill="#6b7280">helm upgrade</text>
+    <text x="20" y="100" font-size="10" font-weight="700" fill="#374151">GitOps / Flux (pull)</text>
+    <rect x="30" y="110" width="110" height="36" rx="7" fill="#9ca3af"/><text x="85" y="132" text-anchor="middle" font-size="9" font-weight="700" fill="#1f2937">git repo</text>
+    <rect x="220" y="110" width="110" height="36" rx="7" fill="#326CE5"/><text x="275" y="132" text-anchor="middle" font-size="9" font-weight="700" fill="#fff">cluster</text>
+    <line x1="220" y1="128" x2="140" y2="128" stroke="#2EA56B" stroke-width="2.5"><animate attributeName="stroke-dashoffset" from="20" to="0" dur="1.3s" repeatCount="indefinite"/></line>
+    <text x="180" y="150" text-anchor="middle" font-size="8" fill="#15803d" font-weight="700">reconciles every interval</text>
+  </svg></div>`;
+}
+
+const LESSONS = [
+{
+  short:"1. Terraform split",
+  title:"1 — Terraform Provisions the Cluster, Not the Workload",
+  body:`<p>Terraform's job in this project stops at "a working EKS control plane and node group exist." The Deployment, Service, and Ingress that actually run the job-board app are a deliberately separate layer, applied with <code>kubectl</code>/<code>helm</code> &mdash; not the <code>kubernetes</code> or <code>helm</code> Terraform providers, which COULD manage them but would couple a one-line image-tag bump to the same <code>plan</code>/<code>apply</code> cycle as the VPC.</p>
+  <p><b>Honest scope note:</b> this machine has no real AWS account or live cluster. Everything here is verified <i>statically</i> &mdash; <code>terraform init -backend=false && terraform validate</code> succeeds with zero credentials, because <code>validate</code> only checks the configuration's internal consistency (types, references, required arguments), not real cloud state. A real <code>terraform apply</code> would still need genuine AWS credentials and could still fail on IAM/quota issues that validate can't see.</p>`,
+  diagram: terraformSplitSVG(),
+  code:`# terraform/backend.tf\n# terraform {\n#   backend "s3" {\n#     bucket       = "job-board-tfstate"\n#     key          = "kubernetes-iac-deployment/terraform.tfstate"\n#     use_lockfile = true  # GA since Terraform 1.11, replaces DynamoDB locking\n#   }\n# }\n\n# Verified without any AWS credentials:\n# $ terraform init -backend=false && terraform validate\n# Success! The configuration is valid.`,
+  continueLearning:[
+    {type:"read",label:"Terraform — S3 Backend (state + native locking)",url:"https://developer.hashicorp.com/terraform/language/backend/s3"}
+  ],
+  quickCheck:{
+    q:"Why does this project's Terraform stop at provisioning the EKS cluster, rather than also managing the Deployment/Service with the kubernetes Terraform provider?",
+    options:[
+      {t:"Terraform cannot manage Kubernetes resources at all",ok:false},
+      {t:"It COULD, but that would couple application deploys (a frequent, small change) to the same plan/apply cycle as infrastructure (a rare, large change)",ok:true},
+      {t:"AWS EKS doesn't support the kubernetes provider",ok:false}
+    ],
+    explain:"Mixing the two isn't technically impossible — it's an availability/blast-radius tradeoff. Keeping them separate means a routine image bump never touches the same state file as the VPC."
+  }
+},
+{
+  short:"2. Probes",
+  title:"2 — Readiness vs. Liveness Probes",
+  body:`<p>Both probes check the same <code>/health</code> endpoint here, but Kubernetes reacts completely differently to each failing. A failed <b>readinessProbe</b> removes the pod from the Service's endpoints &mdash; no traffic reaches it &mdash; without touching the container itself. A failed <b>livenessProbe</b> (repeatedly, past <code>failureThreshold</code>) gets the container <b>killed and restarted</b>, because the process is considered unrecoverable without one.</p>
+  <p><b>The trap:</b> using <code>livenessProbe</code> to check "has the app finished starting up yet" kills a slow-starting pod in an endless restart loop &mdash; it never gets the chance to finish starting, because it keeps getting killed partway through. <code>readinessProbe</code>'s <code>initialDelaySeconds: 3</code> exists for exactly this: withhold traffic without punishing the pod for still warming up.</p>`,
+  diagram: probesSVG(),
+  code:`# k8s/deployment.yaml\nreadinessProbe:\n  httpGet: {path: /health, port: 8000}\n  initialDelaySeconds: 3\n  periodSeconds: 5\nlivenessProbe:\n  httpGet: {path: /health, port: 8000}\n  initialDelaySeconds: 10\n  periodSeconds: 10\n  failureThreshold: 3\n\nstrategy:\n  rollingUpdate: {maxSurge: 1, maxUnavailable: 0}`,
+  continueLearning:[
+    {type:"read",label:"Kubernetes — Configure Liveness, Readiness, and Startup Probes",url:"https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/"}
+  ],
+  quickCheck:{
+    q:"A pod's readinessProbe fails but its livenessProbe keeps passing. What does Kubernetes do?",
+    options:[
+      {t:"Removes the pod from the Service's endpoints (no traffic routed to it) WITHOUT restarting the container",ok:true},
+      {t:"Immediately kills and restarts the container",ok:false},
+      {t:"Nothing — only a failed livenessProbe has any effect",ok:false}
+    ],
+    explain:"Readiness controls traffic routing; liveness controls the container's existence. A pod can be 'not ready' (temporarily can't serve traffic) without being 'not alive' (needs a restart) — that distinction is the entire reason two separate probes exist."
+  }
+},
+{
+  short:"3. Helm Templating",
+  title:"3 — Helm: Values In, Manifests Out",
+  body:`<p><code>helm template</code> renders <code>templates/*.yaml</code> against <code>values.yaml</code> (or a <code>--set</code> override) into plain Kubernetes YAML &mdash; the same Deployment/Service/Ingress <code>k8s/</code> has, parameterized. <code>helm upgrade --set image.tag=&lt;sha&gt;</code> is how CI deploys a new image without ever editing the chart itself.</p>
+  <p><b>The trap:</b> <code>helm lint</code> checks the chart's STRUCTURE (required files, valid <code>Chart.yaml</code>) &mdash; it does not render every template combination and verify the output is valid Kubernetes YAML. A typo inside an <code>{{ if }}</code> block that only triggers under a specific values override can pass <code>lint</code> cleanly and still produce broken YAML. This project's actual verification pipes <code>helm template</code>'s OUTPUT through <code>kubeconform</code>, which is the step that would have caught that.</p>`,
+  diagram: helmRenderSVG(),
+  code:`# Verified two different ways on this repo's own chart:\n$ helm lint helm/job-board-chart\n1 chart(s) linted, 0 chart(s) failed\n\n$ helm template test helm/job-board-chart | kubeconform -strict\nSummary: 3 resources found - Valid: 3, Invalid: 0, Errors: 0\n\n$ helm template test helm/job-board-chart --set image.tag=abc1234 | grep image:\n  image: "ghcr.io/.../dockerized-microservices-api:abc1234"`,
+  continueLearning:[
+    {type:"read",label:"Helm — Chart Template Guide",url:"https://helm.sh/docs/chart_template_guide/getting_started/"}
+  ],
+  quickCheck:{
+    q:"helm lint reports 0 failures on a chart. Does that prove the chart's rendered YAML is valid under every values.yaml override?",
+    options:[
+      {t:"Yes — lint fully renders and validates every possible template path",ok:false},
+      {t:"No — lint checks chart STRUCTURE, not rendered output; a bug inside a conditional block can still produce invalid YAML under specific values",ok:true},
+      {t:"Lint and rendering are the same operation under the hood",ok:false}
+    ],
+    explain:"This is exactly why the project's own verification pipes helm template's actual output through kubeconform — that's the step that validates the RENDERED result, which lint alone does not do."
+  }
+},
+{
+  short:"4. GitOps",
+  title:"4 — GitOps with Flux: the Cluster Pulls",
+  body:`<p>The CI pipeline (Lesson 3's <code>helm upgrade</code>) PUSHES a change to the cluster, once, when a pipeline runs. Flux's <code>GitRepository</code> + <code>Kustomization</code>/<code>HelmRelease</code> invert that: the cluster itself PULLS from git on its own interval (<code>5m</code> here) and reconciles toward whatever it finds &mdash; so the repo is the declared desired state, and drift gets corrected rather than accumulating.</p>
+  <p>That's the concrete difference a <code>kubectl edit</code> exposes: against the CI-push model, a manual edit just sits there until the next deploy happens to overwrite it. Against Flux, the next reconciliation (within <code>interval</code>) notices the live object doesn't match git and corrects it back &mdash; automatically, with no human re-running anything.</p>`,
+  diagram: gitopsSVG(),
+  code:`# gitops/clusters/production/job-board-kustomization.yaml\napiVersion: kustomize.toolkit.fluxcd.io/v1\nkind: Kustomization\nspec:\n  interval: 5m\n  path: ./k8s\n  prune: true\n  sourceRef: {kind: GitRepository, name: job-board}\n\n# Image automation closes the OTHER direction: a new tag gets\n# written BACK into git, so even image.tag stays declared-in-git:\n# gitops/clusters/production/image-automation.yaml\n# (ImageRepository + ImagePolicy)`,
+  continueLearning:[
+    {type:"read",label:"Flux — Kustomizations",url:"https://fluxcd.io/flux/components/kustomize/kustomizations/"},
+    {type:"read",label:"Flux — HelmReleases",url:"https://fluxcd.io/flux/components/helm/helmreleases/"}
+  ],
+  quickCheck:{
+    q:"Someone runs kubectl edit on a Flux-managed Deployment and changes its replica count directly. What happens?",
+    options:[
+      {t:"The change persists permanently — Flux only acts on the initial deploy",ok:false},
+      {t:"On Flux's next reconciliation (within its interval), it detects the live object doesn't match git and corrects it back automatically",ok:true},
+      {t:"Flux immediately deletes the entire Deployment as a safety measure",ok:false}
+    ],
+    explain:"This is GitOps's core guarantee: git is the single source of truth, and Flux continuously reconciles the live cluster to match it — a manual edit is drift, and drift gets corrected, not preserved."
+  }
+}
+];
+
+let i = 0;
+const el = id => document.getElementById(id);
+
+const QC_KEY = 'chainC_kubernetesIacDeployment_v1';
+function loadQC(){ try{ const raw = localStorage.getItem(QC_KEY); return raw ? JSON.parse(raw) : null; } catch(e){ return null; } }
+const QC_SAVED = loadQC();
+const qcAnswered = (QC_SAVED && Array.isArray(QC_SAVED.qcAnswered) && QC_SAVED.qcAnswered.length===LESSONS.length)
+  ? QC_SAVED.qcAnswered.slice() : new Array(LESSONS.length).fill(false);
+let bestQuizScore = (QC_SAVED && typeof QC_SAVED.quizScore === 'number') ? QC_SAVED.quizScore : null;
+function saveQC(){ try{ localStorage.setItem(QC_KEY, JSON.stringify({qcAnswered, quizScore: bestQuizScore})); } catch(e){} }
+
+function renderCL(links){
+  if(!links || !links.length) return '';
+  const rows = links.map(l=>'<a href="'+l.url+'" target="_blank" rel="noopener"><span class="tag">'+(l.type==='watch'?'Watch':'Read')+'</span>'+l.label+'</a>').join('');
+  return '<div class="cl"><div class="cap">📚 Continue Learning</div>'+rows+'</div>';
+}
+function renderQC(idx){
+  const l = LESSONS[idx];
+  if(!l.quickCheck) return '';
+  const done = qcAnswered[idx];
+  const q = l.quickCheck;
+  const opts = q.options.map((o,oi)=>'<button class="qcopt '+(done && o.ok?'ok':'')+'" data-oi="'+oi+'" '+(done?'disabled':'')+'>'+o.t+'</button>').join('');
+  return '<div class="qc"><div class="cap">✓ Quick Check</div><div class="qt">'+q.q+'</div>'+
+    '<div id="qcopts-'+idx+'">'+opts+'</div>'+
+    '<div class="qcexplain" id="qcexplain-'+idx+'" style="'+(done?'display:block':'')+'">'+q.explain+'</div>'+
+    (done?'':'<div class="note" style="margin-top:8px">Answer to unlock &ldquo;Next&rdquo;.</div>')+'</div>';
+}
+function pickQC(lessonIdx, oi){
+  if(qcAnswered[lessonIdx]) return;
+  qcAnswered[lessonIdx]=true;
+  const q=LESSONS[lessonIdx].quickCheck;
+  document.querySelectorAll('#qcopts-'+lessonIdx+' .qcopt').forEach((b,bi)=>{
+    b.disabled=true; if(q.options[bi].ok) b.classList.add('ok'); else if(bi===oi) b.classList.add('bad');
+  });
+  el('qcexplain-'+lessonIdx).style.display='block';
+  saveQC();
+  updateNextEnabled();
+}
+function updateNextEnabled(){
+  const nb = el('nextBtn');
+  if(nb) nb.disabled = !qcAnswered[i];
+}
+
+function render(){
+  const l = LESSONS[i];
+  el('lesson').innerHTML = '<h2>'+l.title+'</h2>'+l.body+renderCL(l.continueLearning)+renderQC(i);
+  const qcContainer = el('qcopts-'+i);
+  if(qcContainer){ qcContainer.querySelectorAll('.qcopt').forEach(btn=>{ btn.onclick=()=>pickQC(i, +btn.dataset.oi); }); }
+  el('practice').innerHTML = '<h3>Diagram + Code</h3>' + l.diagram + '<pre>'+l.code.replace(/</g,'&lt;')+'</pre>';
+  el('counter').textContent=(i+1)+' / '+LESSONS.length;
+  document.querySelectorAll('.pill').forEach((p,idx)=>p.classList.toggle('active',idx===i));
+  updateNextEnabled();
+}
+function go(d){ i=Math.max(0,Math.min(LESSONS.length-1,i+d)); render(); }
+function showLesson(){
+  el('quizPanel').style.display='none';
+  el('toolPanel').style.display='none';
+  document.querySelector('main').style.display='grid';
+  document.querySelector('nav').style.display='flex';
+}
+
+const QUIZ = [
+  {q:"Why does this project's Terraform manage only the EKS cluster, not the Deployment/Service running on it?",
+   options:[{t:"Keeps a routine app deploy from sharing a plan/apply cycle (and state file) with rare infrastructure changes",ok:true},{t:"The kubernetes/helm Terraform providers don't exist",ok:false},{t:"EKS clusters can't run workloads managed outside Terraform",ok:false}],
+   explain:"It's a deliberate separation of concerns, not a technical limitation — mixing them couples two very different change cadences to one state file."},
+  {q:"What's the concrete difference in Kubernetes' reaction to a failed readinessProbe vs. a failed livenessProbe?",
+   options:[{t:"Readiness removes the pod from Service endpoints (no restart); liveness restarts the container",ok:true},{t:"They trigger identical behavior — restart the container either way",ok:false},{t:"Readiness restarts the container; liveness just logs a warning",ok:false}],
+   explain:"This is the exact distinction that prevents a slow-starting pod from being killed in a restart loop before it ever finishes starting up."},
+  {q:"terraform validate succeeds with zero AWS credentials configured. What does that actually prove?",
+   options:[{t:"The configuration will definitely succeed on a real terraform apply",ok:false},{t:"The configuration is internally consistent (valid HCL, correct references/types) — NOT that a real apply would succeed against real AWS",ok:true},{t:"AWS credentials are never required for any Terraform operation",ok:false}],
+   explain:"validate is a static check. A real apply could still fail on IAM permissions, quota limits, or region-specific constraints that validate has no way to see."},
+  {q:"helm lint passes cleanly on a chart. Does this guarantee the rendered YAML is valid under every values.yaml override?",
+   options:[{t:"Yes, lint renders and validates all possible template combinations",ok:false},{t:"No — lint checks chart structure only; helm template piped through a validator is what actually proves rendered output is valid",ok:true},{t:"lint and template produce identical validation",ok:false}],
+   explain:"A bug inside a conditional block that only triggers under a specific override can pass lint and still render broken YAML — this project's own verification catches exactly that gap."},
+  {q:"What's the real mechanical difference between the CI-driven deploy (helm upgrade in a GitHub Actions job) and the Flux GitOps deploy?",
+   options:[{t:"CI pushes a change to the cluster when a pipeline runs; Flux's controllers pull from git on their own interval and reconcile toward it",ok:true},{t:"They are functionally identical with no meaningful difference",ok:false},{t:"CI can only deploy to staging; Flux can only deploy to production",ok:false}],
+   explain:"Push vs. pull is the entire conceptual shift GitOps makes — it changes WHO initiates a deployment, not just which tool runs the command."},
+  {q:"A Flux-managed Deployment gets manually edited via kubectl. What happens on Flux's next reconciliation?",
+   options:[{t:"Flux detects the live object no longer matches git and corrects it back automatically",ok:true},{t:"Flux updates git to match the manual edit",ok:false},{t:"Nothing — Flux only reconciles on initial creation",ok:false}],
+   explain:"Git is the single source of truth under GitOps — a live manual change is drift, and Flux's whole job is correcting drift back to what's declared in the repo."}
+];
+let qi=0, qscore=0, qansw=false;
+function openQuiz(){
+  document.querySelector('main').style.display='none';
+  document.querySelector('nav').style.display='none';
+  el('quizPanel').style.display='block';
+  document.querySelectorAll('.pill').forEach(p=>p.classList.remove('active'));
+  el('quizpill').classList.add('active');
+  qi=0; qscore=0; renderQuiz();
+}
+function renderQuiz(){
+  qansw=false;
+  const it=QUIZ[qi];
+  el('quizPanel').innerHTML='<h2>Check Your Understanding</h2>'+
+    '<div class="qtext">'+(qi+1)+' / '+QUIZ.length+' &mdash; '+it.q+'</div><div id="qopts"></div>'+
+    '<div class="qexplain" id="qexplain">'+it.explain+'</div>'+
+    '<div class="qfoot"><span class="sc" id="qsc">Score: '+qscore+' / '+QUIZ.length+'</span>'+
+    '<button class="ghost" id="qnext" disabled onclick="nextQuiz()">'+(qi===QUIZ.length-1?'See score →':'Next →')+'</button></div>';
+  const o=el('qopts');
+  it.options.forEach((op,idx)=>{const b=document.createElement('button');b.className='qopt';b.textContent=op.t;b.onclick=(e)=>pickQuiz(idx,e.currentTarget);o.appendChild(b);});
+}
+function pickQuiz(idx,btn){
+  if(qansw)return; qansw=true;
+  const it=QUIZ[qi];
+  el('qopts').querySelectorAll('.qopt').forEach((b,i2)=>{b.disabled=true;if(it.options[i2].ok)b.classList.add('ok');});
+  if(it.options[idx].ok){qscore++;el('qsc').textContent='Score: '+qscore+' / '+QUIZ.length;} else btn.classList.add('bad');
+  el('qexplain').style.display='block'; el('qnext').disabled=false;
+}
+function nextQuiz(){ qi++; if(qi<QUIZ.length)renderQuiz(); else finishQuiz(); }
+function finishQuiz(){
+  const pct=Math.round(qscore/QUIZ.length*100);
+  const msg=pct===100?'Perfect — you’ve got this.':pct>=70?'Solid understanding.':pct>=40?'Good start — revisit the lessons you missed.':'Worth another pass through the lessons.';
+  el('quizPanel').innerHTML='<h2>Check Your Understanding</h2><div class="qtext">You scored '+qscore+' / '+QUIZ.length+' ('+pct+'%)</div><p>'+msg+'</p>'+
+    '<button class="ghost" onclick="restartQuiz()">↺ Retake</button> <button class="ghost" onclick="showLesson()">← Back to lessons</button>';
+  bestQuizScore = (bestQuizScore===null) ? qscore : Math.max(bestQuizScore, qscore);
+  saveQC();
+}
+function restartQuiz(){ qi=0; qscore=0; renderQuiz(); }
+
+function letterGrade(pct){
+  if(pct===null) return {text:'—',cls:'grade-dash'};
+  if(pct>=90) return {text:'A',cls:'grade-A'};
+  if(pct>=80) return {text:'B',cls:'grade-B'};
+  if(pct>=70) return {text:'C',cls:'grade-C'};
+  if(pct>=60) return {text:'D',cls:'grade-D'};
+  return {text:'F',cls:'grade-F'};
+}
+function renderReportCard(){
+  const qcDone = qcAnswered.filter(Boolean).length;
+  const attempted = bestQuizScore !== null;
+  const pct = attempted ? Math.round(bestQuizScore/QUIZ.length*100) : null;
+  const grade = letterGrade(attempted?pct:null);
+  const overallItems = qcDone + (attempted?1:0);
+  const overallTotal = LESSONS.length+1;
+  const overallPct = Math.round(overallItems/overallTotal*100);
+  const now = new Date();
+  el('toolPanel').innerHTML =
+    '<h2 style="color:#93b4ff;margin-top:0">Report Card</h2>'+
+    '<p style="color:var(--muted);font-size:12px;margin-top:-6px">Kubernetes-IaC-Deployment &middot; generated '+now.toLocaleDateString()+' '+now.toLocaleTimeString()+'</p>'+
+    '<div class="report-overall"><span class="big '+grade.cls+'">'+grade.text+'</span><span style="color:var(--muted);font-size:13px">Final quiz grade'+(attempted?'':' (not yet taken)')+'</span></div>'+
+    '<h4>Lessons</h4><div class="report-row"><span>Quick checks completed</span><span class="grade">'+qcDone+' / '+LESSONS.length+'</span></div>'+
+    '<h4>Final Quiz</h4><div class="report-row"><span>Best score</span><span class="grade">'+(attempted?(bestQuizScore+' / '+QUIZ.length+' ('+pct+'%)'):'Not attempted')+'</span></div>'+
+    '<h4>Overall</h4><div class="report-row"><span>Lessons + quiz completed</span><span class="grade">'+overallItems+' / '+overallTotal+' ('+overallPct+'%)</span></div>'+
+    '<button class="ghost" id="printBtn" style="margin-top:16px">🖨️ Print / Save as PDF</button>'+
+    '<p style="color:var(--muted);font-size:11px;margin-top:8px">In the print dialog, choose <b>Save as PDF</b> and save it into this project\'s <code>docs/</code> folder to keep a dated record.</p>';
+  el('printBtn').onclick = ()=>window.print();
+}
+function openReportCard(){
+  document.querySelector('main').style.display='none';
+  document.querySelector('nav').style.display='none';
+  el('quizPanel').style.display='none';
+  el('toolPanel').style.display='block';
+  document.querySelectorAll('.pill').forEach(p=>p.classList.remove('active'));
+  el('reportpill').classList.add('active');
+  renderReportCard();
+}
+
+const pills=el('pills');
+LESSONS.forEach((l,idx)=>{const b=document.createElement('div');b.className='pill';b.textContent=l.short;b.onclick=()=>{showLesson();i=idx;render();};pills.appendChild(b);});
+const qp=document.createElement('div');qp.className='pill';qp.id='quizpill';qp.textContent='✓ Quiz';qp.onclick=openQuiz;pills.appendChild(qp);
+const rp=document.createElement('div');rp.className='pill';rp.id='reportpill';rp.textContent='📊 Report Card';rp.onclick=openReportCard;pills.appendChild(rp);
+render();
+</script>
+</body>
+</html>

@@ -7,6 +7,11 @@
 
 <!-- SCREENSHOT PLACEHOLDER: docs/screenshots/overview.png -->
 
+> **Why this matters:** Terraform + Kubernetes + Helm + GitOps is the
+> default production deployment stack at any company past a handful of
+> engineers — hired for as *Platform Engineer* or *DevOps/SRE*. This project
+> takes C-2's exact containerized app the rest of the way to production.
+
 ## Why This Was Built
 
 Deploying by hand is fine right up until you have to do it again under pressure and can't remember the
@@ -31,7 +36,15 @@ genuinely reflect readiness, and a rollback I've actually rehearsed rather than 
 
 ```
 Kubernetes-IaC-Deployment/
-├── README.md
+├── terraform/              # provisions the EKS cluster + VPC only — not the workload
+│   ├── main.tf, variables.tf, outputs.tf, versions.tf
+│   └── backend.tf          # S3 remote state (commented — needs a real bucket)
+├── k8s/                    # raw manifests: Deployment, Service, Ingress, ConfigMap, Secret, HPA
+│   └── kustomization.yaml
+├── helm/job-board-chart/   # the same app, packaged as a Helm chart
+├── monitoring/values-kube-prometheus-stack.yaml  # override for the COMMUNITY chart
+├── gitops/clusters/production/  # Flux: GitRepository, Kustomization, HelmRelease, image automation
+├── .github/workflows/deploy.yml  # build -> push GHCR -> helm upgrade -> verify rollout
 ├── docs/{LESSON_PLAN.md, interactive/index.html, screenshots/}
 ├── LICENSE-GPL
 └── LICENSE-AGPL
@@ -42,15 +55,23 @@ Kubernetes-IaC-Deployment/
 ```bash
 git clone https://github.com/niciahrymer-hillian/Kubernetes-IaC-Deployment.git
 cd Kubernetes-IaC-Deployment
-# Provision the cluster
-terraform init && terraform apply
+
+# Provision the cluster (needs real AWS credentials)
+cd terraform && terraform init && terraform apply
+aws eks update-kubeconfig --region us-east-1 --name job-board-cluster
 
 # Deploy the application
-helm install ops ./chart
+cd ../helm && helm install job-board ./job-board-chart -n job-board --create-namespace
 
 # Watch the rollout, then practise the rollback
-kubectl rollout status deploy/ops
-kubectl rollout undo deploy/ops
+kubectl rollout status deploy/job-board-job-board -n job-board
+kubectl rollout undo deploy/job-board-job-board -n job-board
+
+# Static validation (no cluster/cloud account needed) — how this repo itself
+# was verified:
+terraform -chdir=terraform init -backend=false && terraform -chdir=terraform validate
+kubeconform -strict -summary k8s/*.yaml
+helm lint helm/job-board-chart && helm template test helm/job-board-chart | kubeconform -strict
 ```
 
 ## Chain Navigation

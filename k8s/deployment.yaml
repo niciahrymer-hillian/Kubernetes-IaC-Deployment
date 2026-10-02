@@ -1,0 +1,63 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: job-board-api
+  namespace: job-board
+  labels:
+    app: job-board-api
+spec:
+  replicas: 3
+  # maxUnavailable: 0 is what makes this a ZERO-DOWNTIME rollout — Kubernetes
+  # must bring up a new pod and have it pass readinessProbe BEFORE it's
+  # allowed to take an old one down. maxSurge: 1 bounds how many EXTRA pods
+  # (beyond `replicas`) can exist mid-rollout, capping the resource spike.
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  selector:
+    matchLabels:
+      app: job-board-api
+  template:
+    metadata:
+      labels:
+        app: job-board-api
+    spec:
+      containers:
+        - name: api
+          image: ghcr.io/niciahrymer-hillian/dockerized-microservices-api:latest
+          ports:
+            - containerPort: 8000
+          envFrom:
+            - configMapRef:
+                name: job-board-config
+            - secretRef:
+                name: job-board-secret
+          # readinessProbe gates traffic: a pod that fails it is removed from
+          # the Service's endpoints but NOT restarted — it might just be
+          # warming up. livenessProbe gates existence: a pod that fails it
+          # enough times gets KILLED and restarted, because the process is
+          # considered unrecoverable without a restart. Using livenessProbe
+          # for "is it warmed up yet" would kill a slow-starting pod in a
+          # restart loop instead of just waiting.
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8000
+            initialDelaySeconds: 3
+            periodSeconds: 5
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8000
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            failureThreshold: 3
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "128Mi"
+            limits:
+              cpu: "500m"
+              memory: "256Mi"

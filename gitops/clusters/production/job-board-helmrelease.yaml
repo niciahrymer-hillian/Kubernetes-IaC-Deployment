@@ -1,0 +1,23 @@
+# Path B (the alternative to the Kustomization above — a real cluster picks
+# ONE, not both, for the same app): helm-controller reconciles this exactly
+# like `helm upgrade --install`, except Flux calls it on its own interval
+# instead of a CI job calling it once. chart.spec.sourceRef points at the
+# SAME GitRepository, with chart.spec.chart as the in-repo path to the chart
+# — no separate Helm repository index needed.
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: job-board
+  namespace: flux-system
+spec:
+  interval: 5m
+  targetNamespace: job-board
+  chart:
+    spec:
+      chart: ./helm/job-board-chart
+      sourceRef:
+        kind: GitRepository
+        name: job-board
+  values:
+    image:
+      tag: latest

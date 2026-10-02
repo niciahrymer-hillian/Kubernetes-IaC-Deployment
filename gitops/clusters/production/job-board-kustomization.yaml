@@ -1,0 +1,18 @@
+# Path A (of two shown in this project): plain-manifest deploy. The
+# kustomize-controller builds k8s/kustomization.yaml's resource list and
+# applies it — this is the GitOps-native equivalent of `kubectl apply -f k8s/`,
+# except it also PRUNES anything removed from git, and re-applies on its own
+# interval if someone `kubectl edit`s a live object back out of sync.
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: job-board-manifests
+  namespace: flux-system
+spec:
+  interval: 5m
+  path: ./k8s
+  prune: true
+  sourceRef:
+    kind: GitRepository
+    name: job-board
+  timeout: 2m

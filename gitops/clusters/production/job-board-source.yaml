@@ -1,0 +1,14 @@
+# The GitRepository is what makes "the repo is the desired state" literal:
+# Flux's source-controller polls THIS url/ref on its own interval and
+# produces an artifact every other Flux resource here builds from. Nothing
+# ever pushes TO the cluster — the cluster pulls.
+apiVersion: source.toolkit.fluxcd.io/v1
+kind: GitRepository
+metadata:
+  name: job-board
+  namespace: flux-system
+spec:
+  interval: 1m
+  url: https://github.com/niciahrymer-hillian/Kubernetes-IaC-Deployment
+  ref:
+    branch: main
